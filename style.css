@@ -1,0 +1,23 @@
+.App {
+  font-family: sans-serif;
+}
+
+html,
+body {
+  background-color: #333;
+  color: #777;
+}
+
+
+.field {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin-botton: 20px;
+  padding: 20px;
+}
+
+label {
+    color: #cf0;
+}
