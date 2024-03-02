@@ -1,49 +1,45 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import {useState} from 'react';
 
-function Block({ children }) {
-  if (!children) {
+function Block( {children} ) {
+  if ( !children ) {
     console.warn("block must have a children");
   } else {
     const data = {
       fields: {},
       action: null,
-      states: {},
       actionData: {}
     };
-
-
-
 
     const onClick = () => {
       console.log('onClick');
       if ( data.action ) {
         Object.entries(data.fields).forEach(([name, component]) => {
-          console.log(component.value);
           data.actionData[name] = component.value;
         });
       } else {
         // warning
       }
 
-      console.log(data.actionData);
       data.action(data.actionData);
-    };
+    };    
+    const onChange = ( {name, type, value} ) => {
+      if ( type === 'number' ) {
+        value = Number(value);
+      }
+
+      data.actionData[name] = value;
+    };     
 
     children = children.map((child) => {
       switch ( child.type ) {
         case Button:
-          if ( React.isValidElement(child) ) {
-            data.action = child.props.action;
-            child = React.cloneElement(child, {onClick});
-            return child;
-          }
-          break;
+          data.action = child.props.action;
+          child = React.cloneElement(child, {onClick});
+          return child;
 
-        case Field:
-          data.states[child.props.name] = useState(0);
-          data.fields[child.props.name] = child;
+        case Field:          
+          child = React.cloneElement(child, {onChange});
           return child;
 
         default: 
@@ -56,13 +52,20 @@ function Block({ children }) {
   return <div className="block">{children}</div>;
 }
 
-function Field({ type, name, label }) {
-  switch (type) {
-    case "boolean":
+function Field({ type, name, label, onChange }) {
+  const onCheckboxChange = event => {
+    onChange({name, type: 'boolean', value: event.target.checked})
+  };
+  const onNumberChange = event => {
+    onChange({name, type: 'number', value: event.target.value})
+  };
+
+  switch ( type ) {
+    case 'boolean':
       return (
         <div className="field">
           <label>{label}</label>
-          <input type="checkbox" name={name} />
+          <input onInput={onCheckboxChange} type="checkbox" name={name} />
         </div>
       );
 
@@ -70,18 +73,18 @@ function Field({ type, name, label }) {
       return (
         <div className="field">
           <label>{label}</label>
-          <input type="number" name={name} />
+          <input onInput={onNumberChange} type="number" name={name} />
         </div>
       );
   }
 }
 
-function Button({ children, action, onClick }) {
+function Button({ children, onClick }) {
   return <button onClick={onClick}>{children}</button>;
 }
 
-const action = () => {
-  console.log("ACTION!");
+const action = data => {
+  console.log("ACTION!", data);
 };
 
 function App(props) {
