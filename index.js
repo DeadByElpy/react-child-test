@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
-function Block( {children} ) {
+function Block ({ children }) {
   if ( !children ) {
     console.warn("block must have a children");
   } else {
@@ -23,7 +23,7 @@ function Block( {children} ) {
 
       data.action(data.actionData);
     };    
-    const onChange = ( {name, type, value} ) => {
+    const onChange = ({ name, type, value } ) => {
       if ( type === 'number' ) {
         value = Number(value);
       }
@@ -87,7 +87,7 @@ const action = data => {
   console.log("ACTION!", data);
 };
 
-function App(props) {
+function App( props ) {
   return (
     <div className="App">
       <Block asd="1">
