@@ -31,7 +31,7 @@ function Block ({ children }) {
       data.actionData[name] = value;
     };     
 
-    children = children.map((child) => {
+    children = children.map(child => {
       switch ( child.type ) {
         case Button:
           data.action = child.props.action;
