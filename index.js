@@ -57,8 +57,8 @@ function Block ({ children }) {
 
 function Field({ type, name, label, fieldsStates, setFieldsStates }) {
   const onCheckboxChange = event => {
+    // https://legacy.reactjs.org/docs/legacy-event-pooling.html
     event.persist();
-    console.log(event.target.value);
 
     setFieldsStates(prev => {
       return {
@@ -68,8 +68,6 @@ function Field({ type, name, label, fieldsStates, setFieldsStates }) {
     });
   };
   const onNumberChange = event => {
-    console.log(event.target);
-    // onChange({name, type: 'number', value: event.target.value})
     setFieldsStates(prev => {
       return {
         ...prev,
