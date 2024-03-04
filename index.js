@@ -1,18 +1,24 @@
-import React from "react";
+import React, {useState} from "react";
 import ReactDOM from "react-dom";
 
 function Block ({ children }) {
+  const [fieldsStates, setFieldsStates] = useState({
+    flag: true,
+    numberValue: 123
+  });
+
   if ( !children ) {
     console.warn("block must have a children");
   } else {
     const data = {
       fields: {},
       action: null,
-      actionData: {}
+      actionData: {},
     };
 
-    const onClick = () => {
+    const onClick = async () => {
       console.log('onClick');
+
       if ( data.action ) {
         Object.entries(data.fields).forEach(([name, component]) => {
           data.actionData[name] = component.value;
@@ -21,28 +27,25 @@ function Block ({ children }) {
         // warning
       }
 
-      data.action(data.actionData);
-    };    
-    const onChange = ({ name, type, value } ) => {
-      if ( type === 'number' ) {
-        value = Number(value);
-      }
+      const result = await data.action(fieldsStates);
 
-      data.actionData[name] = value;
-    };     
+      console.log('set response', result);
 
-    children = children.map(child => {
+      setFieldsStates(result);
+    };
+
+    children = children.map(child  => {
       switch ( child.type ) {
         case Button:
           data.action = child.props.action;
-          child = React.cloneElement(child, {onClick});
+          child = React.cloneElement(child, {onClick, fieldsStates, setFieldsStates});
           return child;
 
-        case Field:          
-          child = React.cloneElement(child, {onChange});
+        case Field:     
+          child = React.cloneElement(child, {fieldsStates, setFieldsStates});
           return child;
 
-        default: 
+        default:
           console.error('unknown Field type');
           return child;
       }
@@ -52,12 +55,27 @@ function Block ({ children }) {
   return <div className="block">{children}</div>;
 }
 
-function Field({ type, name, label, onChange }) {
+function Field({ type, name, label, fieldsStates, setFieldsStates }) {
   const onCheckboxChange = event => {
-    onChange({name, type: 'boolean', value: event.target.checked})
+    event.persist();
+    console.log(event.target.value);
+
+    setFieldsStates(prev => {
+      return {
+        ...prev,
+        [name]: event.target.checked
+      };
+    });
   };
   const onNumberChange = event => {
-    onChange({name, type: 'number', value: event.target.value})
+    console.log(event.target);
+    // onChange({name, type: 'number', value: event.target.value})
+    setFieldsStates(prev => {
+      return {
+        ...prev,
+        [name]: event.target.value
+      };
+    });
   };
 
   switch ( type ) {
@@ -65,7 +83,7 @@ function Field({ type, name, label, onChange }) {
       return (
         <div className="field">
           <label>{label}</label>
-          <input onInput={onCheckboxChange} type="checkbox" name={name} />
+          <input onChange={onCheckboxChange} checked={fieldsStates[name]} type="checkbox" name={name} />
         </div>
       );
 
@@ -73,7 +91,7 @@ function Field({ type, name, label, onChange }) {
       return (
         <div className="field">
           <label>{label}</label>
-          <input onInput={onNumberChange} type="number" name={name} />
+          <input onChange={onNumberChange} value={fieldsStates[name]} type="number" name={name} />
         </div>
       );
   }
@@ -83,14 +101,19 @@ function Button({ children, onClick }) {
   return <button onClick={onClick}>{children}</button>;
 }
 
-const action = data => {
-  console.log("ACTION!", data);
+const action = async data => {
+  console.log('Action', data);
+  data = {...data};
+  data.flag = !data.flag;
+  data.numberValue = data.numberValue * data.numberValue;
+
+  return data;
 };
 
 function App( props ) {
   return (
     <div className="App">
-      <Block asd="1">
+      <Block>
         <Field type="boolean" label="Enable/disable flag" name="flag"></Field>
         <Field type="number" label="Input number value" name="numberValue"></Field>
         <Button action={action}>Click to act</Button>
@@ -103,4 +126,4 @@ function App( props ) {
 console.clear('');
 
 const rootElement = document.getElementById("root");
-ReactDOM.render(<App />, rootElement);
+ReactDOM.render(<App/>, rootElement);
