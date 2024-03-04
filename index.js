@@ -68,6 +68,8 @@ function Field({ type, name, label, fieldsStates, setFieldsStates }) {
     });
   };
   const onNumberChange = event => {
+    event.persist();
+    
     setFieldsStates(prev => {
       return {
         ...prev,
